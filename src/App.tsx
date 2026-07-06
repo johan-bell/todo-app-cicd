@@ -1,42 +1,45 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
 
 interface Todo {
-  id: string
-  text: string
-  done: boolean
+  id: string;
+  text: string;
+  done: boolean;
 }
 
-const STORAGE_KEY = 'todos'
+const STORAGE_KEY = "todos";
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored ? JSON.parse(stored) : []
-  })
-  const [text, setText] = useState('')
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [text, setText] = useState("");
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-  }, [todos])
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  }, [todos]);
 
   const addTodo = (e: React.FormEvent) => {
-    e.preventDefault()
-    const trimmed = text.trim()
-    if (!trimmed) return
-    setTodos([...todos, { id: crypto.randomUUID(), text: trimmed, done: false }])
-    setText('')
-  }
+    e.preventDefault();
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setTodos([
+      ...todos,
+      { id: crypto.randomUUID(), text: trimmed, done: false },
+    ]);
+    setText("");
+  };
 
   const toggleTodo = (id: string) => {
-    setTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-  }
+    setTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  };
 
   const deleteTodo = (id: string) => {
-    setTodos(todos.filter((t) => t.id !== id))
-  }
+    setTodos(todos.filter((t) => t.id !== id));
+  };
 
-  const remaining = todos.filter((t) => !t.done).length
+  const remaining = todos.filter((t) => !t.done).length;
 
   return (
     <main id="app">
@@ -55,7 +58,7 @@ function App() {
 
       <ul className="todo-list">
         {todos.map((todo) => (
-          <li key={todo.id} className={todo.done ? 'done' : ''}>
+          <li key={todo.id} className={todo.done ? "done" : ""}>
             <label>
               <input
                 type="checkbox"
@@ -82,7 +85,7 @@ function App() {
         </p>
       )}
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
