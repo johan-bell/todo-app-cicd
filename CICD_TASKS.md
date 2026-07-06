@@ -30,16 +30,14 @@ if the self-hosted runner turns out to be impractical.)
       `./svc.sh install && ./svc.sh start`
 - [ ] Confirm the runner shows as **Idle** under Settings → Actions → Runners
 
-## Phase 4 — Write the GitHub Actions workflow
+## Phase 4 — Write the GitHub Actions workflow(s)
 
-- [ ] Create `.github/workflows/deploy.yml`
-- [ ] Trigger: `on: push: branches: [main]`
-- [ ] Steps:
-  - [ ] Checkout code
-  - [ ] Set up Node
-  - [ ] `npm ci`
-  - [ ] Lint / typecheck (quality gate — fail fast before building)
-  - [ ] `npm run build`
+- [x] Create `.github/workflows/test.yml` — CI quality gate, runs on every
+      push/PR to `main`: checkout → setup Node → `npm ci` → lint →
+      format check → typecheck → test → build (runs on GitHub-hosted
+      runner, no server access needed)
+- [ ] Create `.github/workflows/deploy.yml` — CD, runs on push to `main`
+      only, after the same checks:
   - [ ] Build the Docker image
   - [ ] Deploy step (runs on the self-hosted runner, so it's just shell):
         stop/remove the old container, run the new image
