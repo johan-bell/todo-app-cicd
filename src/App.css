@@ -1,0 +1,87 @@
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 48px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.add-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.add-form input {
+  flex: 1;
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.add-form button {
+  font: inherit;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.todo-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.todo-list li label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.todo-list li.done span {
+  text-decoration: line-through;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.todo-list .delete {
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+}
+
+.todo-list .delete:hover {
+  color: var(--accent);
+}
+
+.status {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--text);
+}
