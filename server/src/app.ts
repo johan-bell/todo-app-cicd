@@ -66,9 +66,12 @@ export function createApp(): Express {
         res.status(400).json({ error: "invalid id" });
         return;
       }
-      const completed = typeof req.body?.completed === "boolean" ? req.body.completed : null;
+      const completed =
+        typeof req.body?.completed === "boolean" ? req.body.completed : null;
       const nextTitle =
-        typeof req.body?.title === "string" && req.body.title.trim() ? req.body.title.trim() : null;
+        typeof req.body?.title === "string" && req.body.title.trim()
+          ? req.body.title.trim()
+          : null;
       const { rows } = await pool.query(
         "UPDATE todos SET completed = COALESCE($1, completed), title = COALESCE($2, title) WHERE id = $3 RETURNING id, title, completed, created_at",
         [completed, nextTitle, id],
@@ -89,7 +92,9 @@ export function createApp(): Express {
         res.status(400).json({ error: "invalid id" });
         return;
       }
-      const { rowCount } = await pool.query("DELETE FROM todos WHERE id = $1", [id]);
+      const { rowCount } = await pool.query("DELETE FROM todos WHERE id = $1", [
+        id,
+      ]);
       res.status(rowCount ? 204 : 404).end();
     }),
   );

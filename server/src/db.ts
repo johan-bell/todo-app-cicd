@@ -23,14 +23,19 @@ const SCHEMA = `
  * API boots. Compose already waits for the db healthcheck, but this is a cheap
  * extra guard against races.
  */
-export async function runMigrations(retries = 10, delayMs = 2000): Promise<void> {
+export async function runMigrations(
+  retries = 10,
+  delayMs = 2000,
+): Promise<void> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await pool.query(SCHEMA);
       return;
     } catch (err) {
       if (attempt === retries) throw err;
-      console.warn(`DB not ready (attempt ${attempt}/${retries}); retrying in ${delayMs}ms`);
+      console.warn(
+        `DB not ready (attempt ${attempt}/${retries}); retrying in ${delayMs}ms`,
+      );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
