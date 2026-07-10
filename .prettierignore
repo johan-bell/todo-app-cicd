@@ -1,2 +1,5 @@
 dist
 coverage
+server
+docker-compose.yml
+.github

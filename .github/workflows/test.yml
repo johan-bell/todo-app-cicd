@@ -5,9 +5,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_call:
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,20 +21,46 @@ jobs:
           node-version: lts/*
           cache: npm
 
-      - name: Install dependencies
+      # --- Frontend ---
+      - name: Install (frontend)
         run: npm ci
 
-      - name: Lint
+      - name: Lint (frontend)
         run: npm run lint
 
-      - name: Check formatting
+      - name: Check formatting (frontend)
         run: npm run format:check
 
-      - name: Typecheck
+      - name: Typecheck (frontend)
         run: npm run typecheck
 
-      - name: Test
+      - name: Test (frontend)
         run: npm run test
 
-      - name: Build
+      - name: Build (frontend)
         run: npm run build
+
+      # --- Backend ---
+      - name: Install (server)
+        run: npm install
+        working-directory: server
+
+      - name: Lint (server)
+        run: npm run lint
+        working-directory: server
+
+      - name: Check formatting (server)
+        run: npm run format:check
+        working-directory: server
+
+      - name: Typecheck (server)
+        run: npm run typecheck
+        working-directory: server
+
+      - name: Test (server)
+        run: npm run test
+        working-directory: server
+
+      - name: Build (server)
+        run: npm run build
+        working-directory: server
