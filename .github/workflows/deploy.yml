@@ -1,0 +1,50 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+# Never run two deploys at once; don't cancel an in-flight one midway.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # Reuse the full CI gate (frontend + backend) before deploying.
+  checks:
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    needs: checks
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Compose reads these from .env. GitHub secrets are the single source of
+      # truth; the file is recreated each deploy and is gitignored.
+      - name: Write .env from secrets
+        run: |
+          cat > .env <<EOF
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          EOF
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      # Gate on real readiness: web up -> nginx -> api -> SELECT 1 on Postgres.
+      # Fails the deploy (and shows logs) if the new stack isn't serving.
+      - name: Wait for readiness
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/health/ready >/dev/null; then
+              echo "app is ready"; exit 0
+            fi
+            echo "waiting for app... ($i)"; sleep 2
+          done
+          echo "health check failed"; docker compose logs --tail=100; exit 1
+
+      - name: Prune old images
+        run: docker image prune -f

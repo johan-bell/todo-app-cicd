@@ -25,3 +25,7 @@ dist-ssr
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Env (compose secrets) — never commit real values
+.env
+!.env.example

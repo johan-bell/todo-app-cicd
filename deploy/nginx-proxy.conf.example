@@ -1,0 +1,27 @@
+# Reverse-proxy config for the Nginx VM.
+#
+# This file is a version-controlled REFERENCE. It is not applied automatically.
+# Copy it onto the Nginx VM, e.g.:
+#   sudo cp nginx-proxy.conf.example /etc/nginx/sites-available/todo-app
+#   sudo ln -s /etc/nginx/sites-available/todo-app /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# Then add HTTPS with certbot:
+#   sudo certbot --nginx -d todo.example.com
+# certbot rewrites this block to listen on 443 with the cert and adds an
+# 80 -> 443 redirect.
+
+server {
+    listen 80;
+    server_name todo.example.com; # <-- your domain
+
+    location / {
+        # <-- Docker VM internal IP : the web container's published port (3000)
+        proxy_pass http://10.0.0.0:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
