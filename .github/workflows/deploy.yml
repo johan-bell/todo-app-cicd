@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
 
+  workflow_dispatch:
+
 # Never run two deploys at once; don't cancel an in-flight one midway.
 concurrency:
   group: deploy-production
