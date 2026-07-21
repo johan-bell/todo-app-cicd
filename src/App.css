@@ -85,3 +85,9 @@
   font-size: 14px;
   color: var(--text);
 }
+
+.error {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #d33;
+}

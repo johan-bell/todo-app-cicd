@@ -2,44 +2,75 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 interface Todo {
-  id: string;
-  text: string;
-  done: boolean;
+  id: number;
+  title: string;
+  completed: boolean;
 }
 
-const STORAGE_KEY = "todos";
-
 function App() {
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
+    fetch("/api/todos")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(setTodos)
+      .catch(() => setError("Could not load todos"));
+  }, []);
 
-  const addTodo = (e: React.FormEvent) => {
+  const addTodo = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
-    setTodos([
-      ...todos,
-      { id: crypto.randomUUID(), text: trimmed, done: false },
-    ]);
-    setText("");
+    try {
+      const res = await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const created: Todo = await res.json();
+      // The API lists newest first, so keep that order here too.
+      setTodos([created, ...todos]);
+      setText("");
+      setError(null);
+    } catch {
+      setError("Could not add todo");
+    }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  const toggleTodo = async (todo: Todo) => {
+    try {
+      const res = await fetch(`/api/todos/${todo.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !todo.completed }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const updated: Todo = await res.json();
+      setTodos(todos.map((t) => (t.id === updated.id ? updated : t)));
+      setError(null);
+    } catch {
+      setError("Could not update todo");
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter((t) => t.id !== id));
+  const deleteTodo = async (id: number) => {
+    try {
+      const res = await fetch(`/api/todos/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setTodos(todos.filter((t) => t.id !== id));
+      setError(null);
+    } catch {
+      setError("Could not delete todo");
+    }
   };
 
-  const remaining = todos.filter((t) => !t.done).length;
+  const remaining = todos.filter((t) => !t.completed).length;
 
   return (
     <main id="app">
@@ -56,22 +87,28 @@ function App() {
         <button type="submit">Add</button>
       </form>
 
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+
       <ul className="todo-list">
         {todos.map((todo) => (
-          <li key={todo.id} className={todo.done ? "done" : ""}>
+          <li key={todo.id} className={todo.completed ? "done" : ""}>
             <label>
               <input
                 type="checkbox"
-                checked={todo.done}
-                onChange={() => toggleTodo(todo.id)}
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo)}
               />
-              <span>{todo.text}</span>
+              <span>{todo.title}</span>
             </label>
             <button
               type="button"
               className="delete"
               onClick={() => deleteTodo(todo.id)}
-              aria-label={`Delete "${todo.text}"`}
+              aria-label={`Delete "${todo.title}"`}
             >
               ✕
             </button>
